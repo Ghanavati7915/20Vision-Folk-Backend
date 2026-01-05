@@ -69,6 +69,7 @@ export class AuthService {
           firstname,
           lastname,
           uniquename: username,
+          mobile: username,
           app_action: 1,
         },
       });

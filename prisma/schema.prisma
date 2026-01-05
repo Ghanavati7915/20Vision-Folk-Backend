@@ -85,6 +85,7 @@ model Users {
   bio_long       String?
   bio_small      String?
   address        String?
+  mobile         String?
   email          String?
   website        String?
   nationalCode   String?
