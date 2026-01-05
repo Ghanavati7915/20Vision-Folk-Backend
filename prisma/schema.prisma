@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+///////////////////#region Base
+
+model Skills {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  created_at  DateTime     @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int          @default(1)
+  userSkills  UserSkills[]
+
+  @@map("Skills")
+}
+
+model Cities {
+  id         Int       @id @default(autoincrement())
+  title      String
+  type       String
+  parent_ref Int
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+  users      Users[]
+
+  @@map("Cities")
+}
+
+model ArtsCategories {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  created_at  DateTime  @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int       @default(1)
+  arts        Arts[]
+
+  @@map("ArtsCategories")
+}
+
+///////////////////#endregion
+
+///////////////////#region Auth
+
+model RefreshTokens {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  user       Users    @relation(fields: [user_ref], references: [id])
+  user_ref   Int
+  expires_at DateTime
+  created_at DateTime @default(now())
+  status     Boolean  @default(true)
+
+  @@map("RefreshTokens")
+}
+
+///////////////////#endregion
+
+///////////////////#region Users
+
+model Users {
+  id             Int       @id @default(autoincrement())
+  firstname      String
+  lastname       String
+  extentionname  String?
+  uniquename     String
+  gender         String?
+  username       String    @unique
+  password       String
+  avatar         String?
+  bio_long       String?
+  bio_small      String?
+  address        String?
+  email          String?
+  website        String?
+  nationalCode   String?
+  socialNetworks String?
+  birthDate      DateTime?
+  cities         Cities?   @relation(fields: [city_ref], references: [id])
+  city_ref       Int?
+  created_at     DateTime  @default(now())
+  created_by     Int?
+  modify_at      DateTime?
+  modify_by      Int?
+  app_action     Int       @default(1)
+
+  refreshTokens RefreshTokens[]
+  userSkills    UserSkills[]
+  arts          Arts[]
+  followers     UserFollowers[] @relation("Followers")
+  followings    UserFollowers[] @relation("Followings")
+  artLikes      ArtLikes[]
+  artComments   ArtComments[]
+
+  @@map("Users")
+}
+
+model UserSkills {
+  id         Int       @id @default(autoincrement())
+  user       Users     @relation(fields: [user_ref], references: [id])
+  user_ref   Int
+  skill      Skills    @relation(fields: [skill_ref], references: [id])
+  skill_ref  Int
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("UserSkills")
+}
+
+model UserFollowers {
+  id          Int      @id @default(autoincrement())
+  follower    Users    @relation("Followers", fields: [followerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  followerId  Int
+  following   Users    @relation("Followings", fields: [followingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  followingId Int
+  created_at  DateTime @default(now())
+
+  @@map("UserFollowers")
+}
+
+///////////////////#endregion
+
+///////////////////#region Arts
+
+model Arts {
+  id             Int            @id @default(autoincrement())
+  users          Users          @relation(fields: [user_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_ref       Int
+  artsCategories ArtsCategories @relation(fields: [cat_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cat_ref        Int
+  code           String?
+  title          String
+  description    String?
+  properties     String?        @db.NVarChar(Max)
+  created_at     DateTime       @default(now())
+  created_by     Int
+  modify_at      DateTime?
+  modify_by      Int?
+  app_action     Int            @default(1)
+
+  artsFiles ArtsFiles[]
+  likes     ArtLikes[]
+  comments  ArtComments[]
+
+  @@map("Arts")
+}
+
+model ArtsFiles {
+  id         Int       @id @default(autoincrement())
+  arts       Arts      @relation(fields: [art_ref], references: [id])
+  art_ref    Int
+  title      String
+  file       String?
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("ArtsFiles")
+}
+
+model ArtLikes {
+  id         Int      @id @default(autoincrement())
+  art        Arts     @relation(fields: [art_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  art_ref    Int
+  user       Users    @relation(fields: [user_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_ref   Int
+  created_at DateTime @default(now())
+
+  @@map("ArtLikes")
+}
+
+model ArtComments {
+  id         Int      @id @default(autoincrement())
+  art        Arts     @relation(fields: [art_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  art_ref    Int
+  user       Users    @relation(fields: [user_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_ref   Int
+  content    String
+  created_at DateTime @default(now())
+
+  @@map("ArtComments")
+}
+
+///////////////////#endregion
