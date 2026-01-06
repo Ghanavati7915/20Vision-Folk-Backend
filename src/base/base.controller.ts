@@ -12,8 +12,6 @@ import {
 } from '@nestjs/swagger';
 import { BaseService } from './base.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateSkillDto } from './dto/create-base.dto';
-import { FilterDto } from '../common/DTOs/shared';
 import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Base')
@@ -24,25 +22,18 @@ export class BaseController {
   constructor(private readonly baseService: BaseService) { }
 
   //#region Skills
-  @Post('/skills')
-  @ApiOperation({ summary: 'Create a new skill' })
-  @ApiResponse({ status: 201, description: 'skill created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  skillNew(@Request() req: any, @Body() payload: CreateSkillDto) {
-    return this.baseService.skillNew(req.user.sub, payload);
-  }
-
+  @Public()
   @Get('/skills')
   @ApiOperation({ summary: 'Get all Skills' })
   @ApiResponse({ status: 200, description: 'List of Skills' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  skillGetAll(@Body() filter: FilterDto) {
-    return this.baseService.skillGetAll(filter);
+  skills() {
+    return this.baseService.skills();
   }
   //#endregion
 
   //#region Cities
+  @Public()
   @Get('/countries')
   @ApiOperation({ summary: 'Get all Countries' })
   @ApiResponse({ status: 200, description: 'List of Countries' })
@@ -51,6 +42,7 @@ export class BaseController {
     return this.baseService.countriesGetAll();
   }
 
+  @Public()
   @Get('/provinces/:id')
   @ApiOperation({ summary: 'Get all Provinces' })
   @ApiResponse({ status: 200, description: 'List of Provinces' })
@@ -59,6 +51,7 @@ export class BaseController {
     return this.baseService.provincesGetAll(+id);
   }
 
+  @Public()
   @Get('/cities/:id')
   @ApiOperation({ summary: 'Get all Cities' })
   @ApiResponse({ status: 200, description: 'List of Cities' })

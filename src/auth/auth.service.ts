@@ -79,6 +79,15 @@ export class AuthService {
         data: { created_by: newUser.id },
       });
 
+      await this.prisma.userTypes.create({
+        data: {
+          user_ref: newUser.id,
+          type_ref: 1,
+          app_action: 1,
+          created_by: newUser.id
+        },
+      });
+
       const tokens = await this.getTokens(newUser);
       return tokens;
     } catch (e) {

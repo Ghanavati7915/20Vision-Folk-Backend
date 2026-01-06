@@ -7,5 +7,7 @@ export class AppService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.baseService.seedCitiesIfNotExists();
+    await this.baseService.seedSkillsIfNotExists();
+    await this.baseService.seedTypesIfNotExists();
   }
 }

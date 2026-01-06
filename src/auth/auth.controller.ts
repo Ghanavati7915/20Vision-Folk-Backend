@@ -65,7 +65,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user info from token' })
   @ApiResponse({ status: 200, description: 'User info retrieved successfully' })
   async userInfo(@Request() req) {
-    console.log('req.user: ', req.user);
     return {
       id: req.user.id,
       userName: req.user.userName,

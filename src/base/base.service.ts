@@ -1,16 +1,8 @@
 import {
-  ConflictException,
   GoneException,
-  HttpStatus,
-  Injectable, NotFoundException,
+  Injectable,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CreateJobFieldTitleNewDto,
-  CreateSkillDto,
-} from './dto/create-base.dto';
-import { FilterDto } from 'src/common/DTOs/shared';
-import { Prisma } from '@prisma/client';
 import { CityType } from '../common/enums/enums';
 
 @Injectable()
@@ -18,6 +10,7 @@ export class BaseService {
   constructor(private prisma: PrismaService) { }
 
   //#region Seed
+
   //#region Seed Cities
   async seedCitiesIfNotExists() {
     const existing = await this.prisma.cities.findMany({
@@ -41,7 +34,7 @@ export class BaseService {
           created_by: 0,
         },
       });
-
+      //#endregion
       //#region Create Province
       const province = await tx.cities.create({
         data: {
@@ -51,7 +44,7 @@ export class BaseService {
           created_by: 0,
         },
       });
-
+      //#endregion
       //#region Create Cities of Province
       const isfahanCities = [
         'اصفهان',
@@ -94,103 +87,85 @@ export class BaseService {
   }
   //#endregion
 
-  //#region Skills
-  async skillNew(
-    creator: number,
-    payload: CreateSkillDto,
-  ): Promise<{ message: string; statusCode: number }> {
-    try {
-      //#region Check Exist
-      const existing = await this.prisma.skills.findFirst({
-        where: { title: payload.title, app_action: 1 },
-      });
-      if (existing) {
-        throw new ConflictException('قبلاً ثبت شده است');
-      }
-      //#endregion
-      //#region Create
-      await this.prisma.skills.create({
-        data: {
-          title: payload.title,
-          description: payload.description,
-          created_by: creator,
-        },
-      });
-      //#endregion
-      //#region Response
-      return {
-        message: 'ثبت با موفقیت انجام شد',
-        statusCode: HttpStatus.CREATED,
-      };
-      //#endregion
+  //#region Seed Skills
+  async seedSkillsIfNotExists() {
+    const existing = await this.prisma.skills.findMany({
+      where: { app_action: 1 },
+    });
+
+    if (existing.length > 0) {
+      console.log('✅ Skills already exist.');
+      return;
     }
-    catch (e: any) {
-      if (e instanceof ConflictException) {
-        throw e;
-      }
-      throw new GoneException('مشکلی در ثبت رخ داده است');
-    }
+
+    console.log('🌱 Seeding skills ...');
+    //#region Create Skills
+    const items = [
+      'معرق',
+      'چرم سوزی',
+      'میناکاری',
+    ];
+
+    const payload = items.map((it) => ({
+      title: it,
+      created_by: 0,
+    }));
+
+    await this.prisma.skills.createMany({ data: payload });
+    //#endregion
+
+    console.log('✅ Skills seeded successfully.');
   }
+  //#endregion
 
-  async skillGetAll(filter: FilterDto) {
+  //#region Seed Types
+  async seedTypesIfNotExists() {
+    const existing = await this.prisma.types.findMany({
+      where: { app_action: 1 },
+    });
+
+    if (existing.length > 0) {
+      console.log('✅ Types already exist.');
+      return;
+    }
+
+    console.log('🌱 Seeding types ...');
+    //#region Create Types
+    const items = [
+      'کاربر',
+      'هنرمند',
+    ];
+
+    const payload = items.map((it) => ({
+      title: it,
+      created_by: 0,
+    }));
+
+    await this.prisma.types.createMany({ data: payload });
+    //#endregion
+
+    console.log('✅ Types seeded successfully.');
+  }
+  //#endregion
+
+  //#endregion
+
+  //#region Skills
+  async skills() {
     try {
-      //#region Payload
-      const { search, order, pagination } = filter;
-      //#endregion
-      //#region Where
-      const where: Prisma.SkillsWhereInput = search
-        ? {
-          app_action: 1,
-          OR: [
-            {
-              title: {
-                contains: search,
-              },
-            },
-          ],
-        }
-        : { app_action: 1 };
-      //#endregion
-      //#region Order
-      const allowedOrderFields = ['title', 'created_at'];
-      const orderByField = allowedOrderFields.includes(order?.orderBy)
-        ? order.orderBy
-        : 'created_at';
-
-      const direction = order?.order === 1 ? 'asc' : 'desc';
-
-      const orderBy: Prisma.SkillsOrderByWithRelationInput = {
-        [orderByField]: direction,
-      };
-      //#endregion
-      //#region Pagination
-      const currentPage = pagination?.page || 1;
-      const pageSize = Math.min(pagination?.pageSize || 10, 100); // حداکثر 100
-      const skip = (currentPage - 1) * pageSize;
-      //#endregion
       //#region Transaction
-      const [results, totalItems] = await this.prisma.$transaction([
-        this.prisma.skills.findMany({
-          where,
-          orderBy,
-          skip,
-          take: pageSize,
-          select: {
-            id: true,
-            title: true,
-            description: true,
-          },
-        }),
-        this.prisma.skills.count({ where }),
-      ]);
-      const totalPages = Math.ceil(totalItems / pageSize);
+      const results = await this.prisma.skills.findMany({
+        where: { app_action: 1 },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
+      })
       //#endregion
       //#region Response
       return {
         results,
-        totalItems,
-        totalPages,
-        currentPage,
         message: 'موفق',
       };
       //#endregion

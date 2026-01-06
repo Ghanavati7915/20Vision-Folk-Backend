@@ -23,6 +23,34 @@ model Skills {
   @@map("Skills")
 }
 
+model Types {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String?
+  created_at  DateTime    @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int         @default(1)
+  userTypes   UserTypes[]
+
+  @@map("Types")
+}
+
+model Certificates {
+  id               Int                @id @default(autoincrement())
+  title            String
+  description      String?
+  created_at       DateTime           @default(now())
+  created_by       Int
+  modify_at        DateTime?
+  modify_by        Int?
+  app_action       Int                @default(1)
+  userCertificates UserCertificates[]
+
+  @@map("Certificates")
+}
+
 model Cities {
   id         Int       @id @default(autoincrement())
   title      String
@@ -73,39 +101,40 @@ model RefreshTokens {
 ///////////////////#region Users
 
 model Users {
-  id             Int       @id @default(autoincrement())
-  firstname      String
-  lastname       String
-  extentionname  String?
-  uniquename     String
-  gender         String?
-  username       String    @unique
-  password       String
-  avatar         String?
-  bio_long       String?
-  bio_small      String?
-  address        String?
-  mobile         String?
-  email          String?
-  website        String?
-  nationalCode   String?
-  socialNetworks String?
-  birthDate      DateTime?
-  cities         Cities?   @relation(fields: [city_ref], references: [id])
-  city_ref       Int?
-  created_at     DateTime  @default(now())
-  created_by     Int?
-  modify_at      DateTime?
-  modify_by      Int?
-  app_action     Int       @default(1)
-
-  refreshTokens RefreshTokens[]
-  userSkills    UserSkills[]
-  arts          Arts[]
-  followers     UserFollowers[] @relation("Followers")
-  followings    UserFollowers[] @relation("Followings")
-  artLikes      ArtLikes[]
-  artComments   ArtComments[]
+  id               Int                @id @default(autoincrement())
+  firstname        String
+  lastname         String
+  extentionname    String?
+  uniquename       String
+  gender           String?
+  username         String             @unique
+  password         String
+  avatar           String?
+  bio_long         String?
+  bio_small        String?
+  address          String?
+  mobile           String?
+  email            String?
+  website          String?
+  nationalCode     String?
+  socialNetworks   String?
+  birthDate        String?
+  cities           Cities?            @relation(fields: [city_ref], references: [id])
+  city_ref         Int?
+  created_at       DateTime           @default(now())
+  created_by       Int?
+  modify_at        DateTime?
+  modify_by        Int?
+  app_action       Int                @default(1)
+  refreshTokens    RefreshTokens[]
+  userSkills       UserSkills[]
+  arts             Arts[]
+  followers        UserFollowers[]    @relation("Followers")
+  followings       UserFollowers[]    @relation("Followings")
+  artLikes         ArtLikes[]
+  artComments      ArtComments[]
+  userTypes        UserTypes[]
+  userCertificates UserCertificates[]
 
   @@map("Users")
 }
@@ -123,6 +152,36 @@ model UserSkills {
   app_action Int       @default(1)
 
   @@map("UserSkills")
+}
+
+model UserTypes {
+  id         Int       @id @default(autoincrement())
+  user       Users     @relation(fields: [user_ref], references: [id])
+  user_ref   Int
+  type       Types     @relation(fields: [type_ref], references: [id])
+  type_ref   Int
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("UserTypes")
+}
+
+model UserCertificates {
+  id              Int          @id @default(autoincrement())
+  user            Users        @relation(fields: [user_ref], references: [id])
+  user_ref        Int
+  certificate     Certificates @relation(fields: [certificate_ref], references: [id])
+  certificate_ref Int
+  created_at      DateTime     @default(now())
+  created_by      Int
+  modify_at       DateTime?
+  modify_by       Int?
+  app_action      Int          @default(1)
+
+  @@map("UserCertificates")
 }
 
 model UserFollowers {

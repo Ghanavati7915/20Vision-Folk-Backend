@@ -4,6 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { BaseModule } from './base/base.module';
+import { UserModule } from './user/user.module';
+import { ArtistModule } from './artist/artist.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { AppService } from './app.service';
@@ -15,6 +17,8 @@ import { AppService } from './app.service';
     }),
     AuthModule,
     BaseModule,
+    UserModule,
+    ArtistModule,
   ],
   providers: [
     PrismaService,
