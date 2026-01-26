@@ -123,6 +123,7 @@ export class AuthService {
       userName: user.username,
       firstName: user.firstname,
       lastName: user.lastname,
+      avatar: user.avatar ? `${process.env.BACKEND_DOMAIN}/dl/${user.avatar}` : null,
       permissions: [],
       title: `${user.firstname} ${user.lastname}`,
       id: user.id,

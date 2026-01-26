@@ -1,7 +1,4 @@
-import {
-  GoneException,
-  Injectable,
-} from '@nestjs/common';
+import { GoneException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CityType } from '../common/enums/enums';
 
@@ -101,9 +98,15 @@ export class BaseService {
     console.log('🌱 Seeding skills ...');
     //#region Create Skills
     const items = [
-      'معرق',
-      'چرم سوزی',
-      'میناکاری',
+      'مینا سازی',
+      'سوخت معرق و منبت چرم',
+      'نگارگری',
+      'خاتم کاری',
+      'قلم زنی',
+      'مشبک فلز',
+      'احجام فلزی',
+      'تئاتر',
+      'گردشگری',
     ];
 
     const payload = items.map((it) => ({
@@ -131,10 +134,7 @@ export class BaseService {
 
     console.log('🌱 Seeding types ...');
     //#region Create Types
-    const items = [
-      'کاربر',
-      'هنرمند',
-    ];
+    const items = ['کاربر', 'هنرمند'];
 
     const payload = items.map((it) => ({
       title: it,
@@ -145,6 +145,66 @@ export class BaseService {
     //#endregion
 
     console.log('✅ Types seeded successfully.');
+  }
+  //#endregion
+
+  //#region Seed Certificates
+  async seedCertificatesIfNotExists() {
+    const existing = await this.prisma.certificates.findMany({
+      where: { app_action: 1 },
+    });
+
+    if (existing.length > 0) {
+      console.log('✅ Certificates already exist.');
+      return;
+    }
+
+    console.log('🌱 Seeding Certificates ...');
+    //#region Create certificates
+    const items = ['Verified'];
+
+    const payload = items.map((it) => ({
+      title: it,
+      created_by: 0,
+    }));
+
+    await this.prisma.certificates.createMany({ data: payload });
+    //#endregion
+
+    console.log('✅ Certificates seeded successfully.');
+  }
+  //#endregion
+
+  //#region Seed Categories
+  async seedCategoriesIfNotExists() {
+    const existing = await this.prisma.artsCategories.findMany({
+      where: { app_action: 1 },
+    });
+
+    if (existing.length > 0) {
+      console.log('✅ Categories already exist.');
+      return;
+    }
+
+    console.log('🌱 Seeding Categories ...');
+    //#region Create Categories
+    const items = [
+      'عمومی',
+      'نقاشی و تصویرگری',
+      'خطاطی و تذهیب',
+      'صنایع دستی',
+      'هنرهای تجسمی'
+    ];
+
+    const payload = items.map((it) => ({
+      title: it,
+      created_by: 0,
+    }));
+
+    await this.prisma.artsCategories.createMany({ data: payload });
+    //#endregion
+
+    console.log('✅ Categories seeded successfully.');
   }
   //#endregion
 
@@ -161,7 +221,32 @@ export class BaseService {
           title: true,
           description: true,
         },
-      })
+      });
+      //#endregion
+      //#region Response
+      return {
+        results,
+        message: 'موفق',
+      };
+      //#endregion
+    } catch (e: any) {
+      throw new GoneException('مشکلی در دریافت اطلاعات رخ داده است');
+    }
+  }
+  //#endregion
+
+  //#region Categories
+  async categories() {
+    try {
+      //#region Transaction
+      const results = await this.prisma.artsCategories.findMany({
+        where: { app_action: 1 },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
+      });
       //#endregion
       //#region Response
       return {
@@ -181,7 +266,7 @@ export class BaseService {
       //#region Query
       const results = await this.prisma.cities.findMany({
         where: { app_action: 1, type: 'Country' },
-      })
+      });
       //#endregion
       //#region Response
       return {
@@ -198,7 +283,7 @@ export class BaseService {
       //#region Query
       const results = await this.prisma.cities.findMany({
         where: { app_action: 1, type: 'Province', parent_ref: id },
-      })
+      });
       //#endregion
       //#region Response
       return {
@@ -215,7 +300,7 @@ export class BaseService {
       //#region Query
       const results = await this.prisma.cities.findMany({
         where: { app_action: 1, type: 'City', parent_ref: id },
-      })
+      });
       //#endregion
       //#region Response
       return {
@@ -229,31 +314,36 @@ export class BaseService {
   }
   async cityGetAll() {
     try {
-      let results: any[] = [];
+      const results: any[] = [];
       //#region Countries
       const _countries = await this.prisma.cities.findMany({
         where: { app_action: 1, type: 'Country' },
-      })
+      });
       //#endregion
 
       for (const country of _countries) {
         //#region Provinces
         const _provinces = await this.prisma.cities.findMany({
           where: { app_action: 1, type: 'Province', parent_ref: country.id },
-        })
+        });
         //#endregion
 
         for (const province of _provinces) {
           //#region Provinces
           const cities = await this.prisma.cities.findMany({
             where: { app_action: 1, type: 'City', parent_ref: province.id },
-          })
+          });
           //#endregion
 
           //#region Provinces
           cities.forEach((city: any) => {
-            results.push({ id: city.id, title: city.title, province: { id: province.id, title: province.title }, country: { id: country.id, title: country.title } });
-          })
+            results.push({
+              id: city.id,
+              title: city.title,
+              province: { id: province.id, title: province.title },
+              country: { id: country.id, title: country.title },
+            });
+          });
           //#endregion
         }
       }
@@ -261,6 +351,113 @@ export class BaseService {
       //#region Response
       return {
         results,
+        message: 'موفق',
+      };
+      //#endregion
+    } catch (e: any) {
+      throw new GoneException('مشکلی در دریافت اطلاعات رخ داده است');
+    }
+  }
+  //#endregion
+
+  //#region Search
+  async search(search: string) {
+    try {
+      //#region Transaction
+      const artists = await this.prisma.users.findMany({
+        where: {
+          app_action: 1,
+          OR: [
+            {
+              firstname: { contains: search },
+            },
+            {
+              lastname: { contains: search },
+            },
+          ],
+          userTypes: {
+            some: {
+              type_ref: 2,
+              app_action: 1,
+            },
+          },
+        },
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+          extentionname: true,
+          avatar: true,
+          userSkills: {
+            where: {
+              app_action: 1,
+            },
+            select: {
+              skill: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+            },
+          },
+          userCertificates: {
+            where: {
+              app_action: 1,
+            },
+            select: {
+              certificate: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      const arts = await this.prisma.arts.findMany({
+        where: {
+          app_action: 1,
+          OR: [{ code: { contains: search } }, { title: { contains: search } }],
+        },
+        select: {
+          id: true,
+          title: true,
+          code: true,
+          cat_ref: true,
+          artsFiles: {
+            where: {
+              app_action: 1,
+            },
+            select: {
+              file: true,
+            },
+          },
+        },
+      });
+      //#endregion
+      //#region Response
+
+
+      artists.forEach((it: any) => {
+        it.avatar = it.avatar ? `${process.env.BACKEND_DOMAIN}/dl/${it.avatar}` : null;
+      })
+
+
+      arts.forEach((it: any) => {
+        it.artsFiles.forEach((file: any) => {
+          file.file = file.file ? `${process.env.BACKEND_DOMAIN}/dl/${file.file}` : null;
+        })
+      })
+
+
+      return {
+        results: {
+          arts,
+          artists,
+        },
         message: 'موفق',
       };
       //#endregion

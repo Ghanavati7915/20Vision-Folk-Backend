@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BaseModule } from './base/base.module';
 import { UserModule } from './user/user.module';
 import { ArtistModule } from './artist/artist.module';
+import { ArtModule } from './art/art.module';
+import { UploadModule } from './upload/upload.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { AppService } from './app.service';
@@ -19,6 +21,8 @@ import { AppService } from './app.service';
     BaseModule,
     UserModule,
     ArtistModule,
+    ArtModule,
+    UploadModule,
   ],
   providers: [
     PrismaService,
@@ -30,4 +34,5 @@ import { AppService } from './app.service';
     Reflector,
   ],
 })
-export class AppModule { }
+export class AppModule { 
+}

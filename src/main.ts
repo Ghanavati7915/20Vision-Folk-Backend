@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';   // 👈 اینو اضافه کن
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
   // افزایش محدودیت اندازه Body
   app.use(bodyParser.json({ limit: '20mb' }));
   app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
+  app.use(express.static('F:/Project/MyDevelopment/PV/20Vision/20Vision-Folk-Backend/src'));
 
   const config = new DocumentBuilder()
     .setTitle('20Vision Art Backend API')

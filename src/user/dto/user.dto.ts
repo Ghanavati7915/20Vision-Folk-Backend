@@ -18,9 +18,6 @@ export class UserDto {
   extentionname?: string;
 
   @ApiProperty()
-  avatar?: string;
-
-  @ApiProperty()
   bio_small?: string;
 
   @ApiProperty()
@@ -50,4 +47,9 @@ export class UserDto {
   @ApiProperty()
   skills?: number[];
 
+}
+
+export class UserAvatarDto {
+  @ApiProperty()
+  path: string;
 }

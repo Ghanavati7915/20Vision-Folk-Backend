@@ -34,4 +34,16 @@ export class ArtistController {
   }
   //#endregion
 
+  //#region Get Artist
+  @Public()
+  @Get(':id')
+  @ApiOperation({ summary: 'Get Artist By ID' })
+  @ApiResponse({ status: 200, description: 'Artist Data' })
+  @ApiResponse({ status: 404, description: 'Artist not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getByID(@Param('id') id: number) {
+    return this.artistService.getByID(id);
+  }
+  //#endregion
+
 }

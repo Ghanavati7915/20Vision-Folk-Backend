@@ -10,7 +10,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserDto } from './dto/user.dto';
+import { UserAvatarDto, UserDto } from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('User')
@@ -40,6 +40,17 @@ export class UserController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   update(@Request() req: any, @Body() payload: UserDto) {
     return this.userService.update(req.user.id, payload);
+  }
+  //#endregion
+
+  //#region Update Avatar
+  @Patch('/avatar')
+  @ApiOperation({ summary: 'Update a Avatar' })
+  @ApiResponse({ status: 201, description: 'User Avatar updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  updateAvatar(@Request() req: any, @Body() payload: UserAvatarDto) {
+    return this.userService.updateAvatar(req.user.id, payload.path);
   }
   //#endregion
 

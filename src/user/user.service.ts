@@ -71,6 +71,8 @@ export class UserService {
       }
       //#endregion
 
+      result.avatar = result.avatar ? `${process.env.BACKEND_DOMAIN}/dl/${result.avatar}` : null;
+
       //#region Response
       return { result };
       //#endregion
@@ -108,7 +110,6 @@ export class UserService {
           lastname: payload.lastname,
           extentionname: payload.extentionname,
           gender: payload.gender,
-          avatar: payload.avatar,
           bio_long: payload.bio_long,
           bio_small: payload.bio_small,
           address: payload.address,
@@ -157,6 +158,51 @@ export class UserService {
           await this.prisma.userTypes.createMany({ data: { user_ref: id, created_by: id, type_ref: 2 } });
         }
       }
+      //#endregion
+
+      //#region Response
+      return {
+        message: 'ویرایش با موفقیت انجام شد',
+        statusCode: HttpStatus.OK,
+      };
+      //#endregion
+    } catch (e: any) {
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+      if (e instanceof ConflictException) {
+        throw e;
+      }
+      if (e instanceof BadRequestException) {
+        throw e;
+      }
+      console.log(e)
+      throw new GoneException('مشکلی در ثبت رخ داده است');
+    }
+  }
+  //#endregion
+
+  //#region Update Avatar
+  async updateAvatar(id: number, path: string) {
+    try {
+      //#region Check Access
+      const userFind = await this.prisma.users.findFirst({
+        where: { app_action: 1, id },
+      });
+      if (!userFind) {
+        throw new NotFoundException('اطلاعات شما یافت نشد');
+      }
+      //#endregion
+
+      //#region Update User Info
+      await this.prisma.users.updateMany({
+        where: { id },
+        data: {
+          avatar: path,
+          modify_by: id,
+          modify_at: new Date(),
+        },
+      });
       //#endregion
 
       //#region Response

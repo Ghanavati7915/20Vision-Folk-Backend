@@ -1,8 +1,6 @@
 import {
   Controller,
-  Post,
-  Body,
-  UseGuards, Request, Get, Param,
+  UseGuards, Get, Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -20,6 +18,17 @@ import { Public } from '../auth/decorators/public.decorator';
 @UseGuards(JwtAuthGuard)
 export class BaseController {
   constructor(private readonly baseService: BaseService) { }
+
+  //#region categories
+  @Public()
+  @Get('/categories')
+  @ApiOperation({ summary: 'Get all Categories' })
+  @ApiResponse({ status: 200, description: 'List of Categories' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  categories() {
+    return this.baseService.categories();
+  }
+  //#endregion
 
   //#region Skills
   @Public()
@@ -69,4 +78,16 @@ export class BaseController {
     return this.baseService.cityGetAll();
   }
   //#endregion
+
+
+  //#region Search
+  @Public()
+  @Get('/search/:text')
+  @ApiOperation({ summary: 'Search In Artist and Arts' })
+  @ApiResponse({ status: 200, description: 'List of Search Result' })
+  search(@Param('text') text: string) {
+    return this.baseService.search(text);
+  }
+  //#endregion
+
 }
